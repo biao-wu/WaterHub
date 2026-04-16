@@ -1,7 +1,7 @@
 import json
-import pymysql
 from datetime import timedelta
 
+from django.db import connection
 from django.db.models import Min
 from django.utils import timezone
 from django.shortcuts import render
@@ -12,9 +12,19 @@ from rest_framework.response import Response
 
 from api import models
 from api.form import SiteForm
-from Water_demo.settings import db
 
-cur = db.cursor(cursor=pymysql.cursors.DictCursor)
+
+def dict_fetchall(cursor):
+    """将 cursor.fetchall() 的结果转换为字典列表"""
+    columns = [col[0] for col in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+
+def dict_fetchone(cursor):
+    """将 cursor.fetchone() 的结果转换为字典"""
+    columns = [col[0] for col in cursor.description]
+    row = cursor.fetchone()
+    return dict(zip(columns, row)) if row else None
 
 
 class Water(APIView):
@@ -51,11 +61,11 @@ class Water(APIView):
         # 站点信息
 
         site_obj = models.Site.objects.all()
-        cur.execute(
-            'SELECT * FROM api_site INNER JOIN api_waterdata on api_site.id = api_waterdata.site_id WHERE time in (SELECT max(time) FROM api_waterdata GROUP BY site_id)')
-        ret = cur.fetchall()
+        with connection.cursor() as cur:
+            cur.execute(
+                'SELECT * FROM api_site INNER JOIN api_waterdata on api_site.id = api_waterdata.site_id WHERE time in (SELECT max(time) FROM api_waterdata GROUP BY site_id)')
+            ret = dict_fetchall(cur)
 
-        db.commit()
         result = []
         for i in ret:
             res = {}
@@ -117,10 +127,10 @@ def water_form(request):
             site_exp = len(set(exp_id_list))
             # 站点信息
             site_obj = models.Site.objects.all()
-            cur.execute(
-                'SELECT * FROM api_site INNER JOIN api_waterdata on api_site.id = api_waterdata.site_id WHERE time in (SELECT max(time) FROM api_waterdata GROUP BY site_id)')
-            ret = cur.fetchall()
-            db.commit()
+            with connection.cursor() as cur:
+                cur.execute(
+                    'SELECT * FROM api_site INNER JOIN api_waterdata on api_site.id = api_waterdata.site_id WHERE time in (SELECT max(time) FROM api_waterdata GROUP BY site_id)')
+                ret = dict_fetchall(cur)
             result = []
             for i in ret:
                 res = {}
@@ -141,8 +151,9 @@ def water_form(request):
 
 
 def echarts_data(request):
-    cur.execute('select chlorine,time,pH,NTU,oxygen,ele from api_waterdata where site_id = 1')
-    ret = cur.fetchall()
+    with connection.cursor() as cur:
+        cur.execute('select chlorine,time,pH,NTU,oxygen,ele from api_waterdata where site_id = 1')
+        ret = dict_fetchall(cur)
     name_list = []
     site_name_1 = models.Site.objects.get(id=1)
     name_list.append(site_name_1.siteName)
@@ -159,9 +170,9 @@ def echarts_data(request):
         ntu_list_one.append(i.get("NTU"))
         oxygen_list_one.append(i.get("oxygen"))
         ele_list_one.append(i.get("ele"))
-    cur.execute('select chlorine,time,pH,NTU,oxygen,ele from api_waterdata where site_id = 2')
-    ret1 = cur.fetchall()
-    db.commit()
+    with connection.cursor() as cur:
+        cur.execute('select chlorine,time,pH,NTU,oxygen,ele from api_waterdata where site_id = 2')
+        ret1 = dict_fetchall(cur)
     site_name_2 = models.Site.objects.get(id=2)
     name_list.append(site_name_2.siteName)
     hours_2 = []

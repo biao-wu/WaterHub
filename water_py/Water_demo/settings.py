@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-import pymysql
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -82,28 +81,29 @@ AUTH_USER_MODEL = "api.UserInfo"
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'water',  # 要连接的数据库，连接前需要创建好
-        'USER': 'wubiao',  # 连接数据库的用户名
-        'PASSWORD': '12341234',  # 连接数据库的密码
-        'HOST': '47.107.153.208',  # 连接主机，默认本级
-        'PORT': 3306,  # 端口 默认3306
-        'OPTIONS': {
-            "init_command": "SET default_storage_engine='INNODB'",
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
-db = pymysql.connect(host='47.107.153.208', user='wubiao', password='12341234', database='water')
+# 原始 MySQL 配置（本地运行已切换为 SQLite）:
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'water',
+#         'USER': 'wubiao',
+#         'PASSWORD': '12341234',
+#         'HOST': '47.107.153.208',
+#         'PORT': 3306,
+#         'OPTIONS': {
+#             "init_command": "SET default_storage_engine='INNODB'",
+#         }
+#     }
+# }
+
+# db = pymysql.connect(host='47.107.153.208', user='wubiao', password='12341234', database='water')
 
 # DATABASES['default']['OPTIONS']['init_command'] = "SET sql_mode='STRICT_TRANS_TABLES'"  # 排除错误
 # Password validation

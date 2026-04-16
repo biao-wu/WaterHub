@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "water-hub",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -29,8 +29,8 @@
     "yarn": "^1.22.0"
   },
   "scripts": {
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider react-app-rewired start",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider react-app-rewired build",
     "test": "react-app-rewired test --env=jsdom",
     "eject": "react-scripts eject"
   },
